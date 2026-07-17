@@ -1,0 +1,24 @@
+# Conda
+.env
+.conda
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data
+data/
+dataset/
+
+# Models
+*.pth
+*.pt
+
+# Logs
+*.log
