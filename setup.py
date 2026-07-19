@@ -1,7 +1,8 @@
 from setuptools import find_packages, setup
+from typing import List
 
 HYPEN_E_DOT = "-e ."
-def get_requirements(file_path:str) -> list[str]:
+def get_requirements(file_path:str) -> List[str]:
     requirements = []
 
     with open(file_path) as file_obj:
@@ -19,6 +20,6 @@ setup(
     version="0.0.1",
     author="Musab Khan",
     author_email="mdmasab879@gmail.com",
-    install_requires=get_requirements("requirements.txt"),
+    install_requires=get_requirements("C:\cnnproject\requirements_dev.txt"),
     packages= find_packages()
 )
