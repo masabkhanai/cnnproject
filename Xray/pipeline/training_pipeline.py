@@ -38,3 +38,8 @@ class TrainPipeline:
             raise XRayException(e, sys)
         
 
+if __name__=="__main__":
+    train_pipeline = TrainPipeline()
+    train_pipeline.start_data_ingestion()
+        
+
