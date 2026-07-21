@@ -13,18 +13,13 @@ class S3Operation:
         except Exception as e:
             raise XRayException(e, sys)
         
-    def sync_folder_from_s3(self, folder:str, bucket_name:str, bucket_folder_name:str)-> None:
-
+    def sync_folder_from_s3(self, folder:str, bucket_name:str, bucket_folder_name:str):
 
         try:
-
-            command:str = (f"aws s3 sync s3://{bucket_name}/{bucket_folder_name}/{folder}")
-
+            command = f"aws s3 sync s3://{bucket_name}/{bucket_folder_name} {folder}"
 
             os.system(command)
-            
+
         except Exception as e:
             raise XRayException(e, sys)
-        
-    
 
