@@ -37,3 +37,13 @@ SHUFFLE:bool = False
 PIN_MEMORY:bool = True
 
 
+# Model Trainer Constant
+
+TRAINED_MODEL_DIR:str = "trained_model" 
+TRAINED_MODEL_NAME:str = "model.pt"
+DEVICE: torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+STEP_SIZE:int = 6
+GAMMA:int = 0.5
+EPOCH:int = 10 #try atleast 1000 epochs and try to see the accuracy and losses
+
+
