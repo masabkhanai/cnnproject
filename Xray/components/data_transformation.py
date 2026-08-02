@@ -85,9 +85,18 @@ class DataTransformation:
                 transform=train_transform
             )
 
+            print("TRAIN CLASS:", train_data.class_to_idx)
+            print("TRAIN SAMPLES:", len(train_data))
+
             test_data :Dataset=ImageFolder(
                 os.path.join(self.data_ingestion_artifact.test_file_path), transform=test_transform
             )
+
+            print("TEST CLASS:", test_data.class_to_idx)
+            print("TEST SAMPLES:", len(test_data))
+
+            # print("TRAIN CLASS:", train_data.class_to_idx)
+            # print("TEST CLASS:", test_data.class_to_idx)
 
             logging.info("Created Train & Test Datapaths ")
 

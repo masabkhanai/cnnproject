@@ -138,11 +138,11 @@ class Net(nn.Module):
 
         x = self.convolution_block_out(x)
 
-        print("before view =", x.shape)
+        # print("before view =", x.shape)
 
         x = x.view(-1, 2)
 
-        print("after view =", x.shape)
+        # print("after view =", x.shape)
 
         return F.log_softmax(x, dim=-1)
 

@@ -55,7 +55,13 @@ class ModelTrainer:
                 y_pred = self.model(data)
 
                 #calculating the loss
-                loss = F.nll_loss(y_pred, target)
+                weights = torch.tensor([1.5, 1.0]).to(DEVICE)
+
+                loss = F.nll_loss(
+                    y_pred,
+                    target,
+                    weight=weights
+                )
 
                 #Backprop
                 loss.backward()
@@ -75,37 +81,86 @@ class ModelTrainer:
     def test(self) -> None:
 
         try:
-            """
-            Description: To Test The Model
-
-            input: model, Device, test_loader
-            output: average loss and accuracy
-            """
 
             logging.info("Entered The Test Method Of Model Trainer Class")
 
             self.model.eval()
-            correct = 0
 
-            test_loss:float = 0.0
+            correct = 0
+            test_loss: float = 0.0
+
+            # ADD THIS
+            pred_counts = {
+                0: 0,
+                1: 0
+            }
+
+            actual_counts = {
+                0: 0,
+                1: 0
+            }
+
 
             with torch.no_grad():
 
                 for (data, target) in self.data_transformation_artifact.transformed_test_object:
+
                     data, target = data.to(DEVICE), target.to(DEVICE)
 
                     output = self.model(data)
 
-                    test_loss += F.nll_loss(output, target, reduction="sum").item()
 
                     pred = output.argmax(dim=1, keepdim=True)
 
-                    correct += pred.eq(target.view_as(pred)).sum().item()
 
-                test_loss /= len(self.data_transformation_artifact.transformed_test_object.dataset)
+                    # prediction count
+                    pred_counts[0] += (pred == 0).sum().item()
+                    pred_counts[1] += (pred == 1).sum().item()
 
-                print("Test Set: Average Loss: {: .4f}, Accuracy: {}/{} ({: .2f}%) \n".format(test_loss, correct, len(self.data_transformation_artifact.transformed_test_object.dataset), 100.0 * correct/len(self.data_transformation_artifact.transformed_test_object.dataset), ))
-            logging.info("Test Set: Average Loss: {: .4f}, Accuracy: {}/{} ({: .2f}%) \n".format(test_loss, correct, len(self.data_transformation_artifact.transformed_test_object.dataset), 100.0 * correct/len(self.data_transformation_artifact.transformed_test_object.dataset), ))
+
+                    # actual label count
+                    actual_counts[0] += (target == 0).sum().item()
+                    actual_counts[1] += (target == 1).sum().item()
+
+
+                    test_loss += F.nll_loss(
+                        output,
+                        target,
+                        reduction="sum"
+                    ).item()
+
+
+                    correct += pred.eq(
+                        target.view_as(pred)
+                    ).sum().item()
+
+
+
+            test_loss /= len(
+                self.data_transformation_artifact.transformed_test_object.dataset
+            )
+
+
+            print("\nActual Dataset Count:")
+            print(actual_counts)
+
+
+            print("\nModel Prediction Count:")
+            print(pred_counts)
+
+
+            print(
+                "\nTest Set: Average Loss: {:.4f}, Accuracy: {}/{} ({:.2f}%)\n".format(
+                    test_loss,
+                    correct,
+                    len(self.data_transformation_artifact.transformed_test_object.dataset),
+                    100.0 * correct / len(self.data_transformation_artifact.transformed_test_object.dataset)
+                )
+            )
+
+
+            logging.info("Exited Test Method")
+
 
         except Exception as e:
             raise XRayException(e, sys)
@@ -126,24 +181,25 @@ class ModelTrainer:
 
                 self.train(optimizer=optimizer)
 
-                optimizer.step()
+                # optimizer.step()
                 scheduler.step()
                 self.test()
 
                 os.makedirs(self.model_trainer_config.artifact_dir, exist_ok=True)
-                torch.save(model, self.model_trainer_config.trained_model_path)
+            torch.save(model.state_dict(), self.model_trainer_config.trained_model_path)
 
-                train_transforms_obj = joblib.load(self.data_transformation_artifact.train_transform_file_path)
+            train_transforms_obj = joblib.load(self.data_transformation_artifact.train_transform_file_path)
 
-                bentoml.pytorch.save_model(name=self.model_trainer_config.trained_bentoml_model_name,model=model, custom_objects={self.model_trainer_config.train_transforms_key:train_transforms_obj})
-                model_trainer_artifact:ModelTrainerArtifact = ModelTrainerArtifact(
+            bentoml.pytorch.save_model(name=self.model_trainer_config.trained_bentoml_model_name,model=model, custom_objects={self.model_trainer_config.train_transforms_key:train_transforms_obj})
+
+            model_trainer_artifact:ModelTrainerArtifact = ModelTrainerArtifact(
                     trained_model_path=self.model_trainer_config.trained_model_path
                 )
 
-                logging.info(
+            logging.info(
                     'Exited The intiate_model_method'
                 )
-                return model_trainer_artifact
+            return model_trainer_artifact
 
         except Exception as e:
             raise XRayException( e, sys)
